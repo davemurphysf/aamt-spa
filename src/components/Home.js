@@ -39,15 +39,15 @@ class Home extends Component {
         return (
             <div>
                 <Row>
-                    <Col sm={4}></Col>
-                    <Col sm={4}>
+                    <Col sm={3}></Col>
+                    <Col sm={6}>
                         <Form onSubmit={this.requestTweets}>
                             <FormGroup>
                                 <InputGroup>
                                     <InputGroup.Addon>@</InputGroup.Addon>
                                     <FormControl
                                         type="text"
-                                        placeholder="i.e. KimKardashian"
+                                        placeholder="i.e. KimKardashian, Levie, ElonMusk"
                                         onChange={this.onType}
                                     />
                                     <InputGroup.Button>
@@ -63,7 +63,7 @@ class Home extends Component {
                             </FormGroup>
                         </Form>
                     </Col>
-                    <Col sm={4}>
+                    <Col sm={3}>
                         {this.props.tweets.isLoading &&
                             <img className="pull-right" alt="loading..." height={64} width={64} src="/loading.gif" />
                         }

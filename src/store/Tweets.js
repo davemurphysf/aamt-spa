@@ -3,14 +3,15 @@ import axios from "axios";
 const requestTweetsType = 'FETCH_TWEETS';
 const receiveTweetsType = 'RECEIVE_TWEETS';
 const tweetsErrorType = 'TWEETS_ERROR';
-const requestAnalyzeTextType = 'SIGNALR_ANALYZE_TEXT';
+const requestAnalyzeTextType = 'REQUEST_ANALYZE_TEXT';
 const receiveAnalyzeTextType = 'RECEIVE_TEXT_ANALYSIS';
-const requestAnalyzeImageType = 'SIGNALR_ANALYZE_IMAGE';
+const requestAnalyzeImageType = 'REQUEST_ANALYZE_IMAGE';
 const receiveAnalyzeImageType = 'RECEIVE_IMAGE_ANALYSIS';
 
 const initialState = {
     tweets: {},
     textAnalysis: {},
+    imageAnalysis: {},
     isLoading: false
 };
 
@@ -59,18 +60,34 @@ export const actionCreators = {
             });
         }
     },
-    requestImageAnalysis: (imageUrl) => async (dispatch, getState) => {
+    requestImageAnalysis: (id, imageUrl) => async (dispatch, getState) => {
         dispatch({
-            type: requestAnalyzeImageType,
-            imageUrl: imageUrl
+            type: requestAnalyzeTextType
         });
+
+        try {
+            const postResponse = await axios.post(`https://aamt-func.azurewebsites.net/api/analyzeimage`, {
+                imageUrl: imageUrl
+            });
+
+            dispatch({
+                type: receiveAnalyzeImageType,
+                imageAnalysis: postResponse.data,
+                tweetId: id
+            });
+        } catch (error) {
+            dispatch({
+                type: tweetsErrorType,
+                errorMessage: 'Requesting image analysis failed'
+            });
+        }
     }
 };
 
 export const reducer = (state, action) => {
     state = state || initialState;
 
-    if (action.type === requestTweetsType || action.type === requestAnalyzeTextType) {
+    if (action.type === requestTweetsType || action.type === requestAnalyzeTextType || action.type === requestAnalyzeImageType) {
         return {
             ...state,
             isLoading: true
@@ -104,7 +121,15 @@ export const reducer = (state, action) => {
     }
 
     if (action.type === receiveAnalyzeImageType) {
-        return { ...state };
+        const updatedImageObj = Object.assign({}, state.imageAnalysis);
+
+        updatedImageObj[action.tweetId] = action.imageAnalysis;
+
+        return {
+            ...state,
+            imageAnalysis: updatedImageObj,
+            isLoading: false
+        };
     }
 
     if (action.type === tweetsErrorType) {

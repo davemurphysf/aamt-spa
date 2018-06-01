@@ -11,6 +11,7 @@ class Tweet extends Component {
         this.analyzeText = this.analyzeText.bind(this);
         this.analyzeImage = this.analyzeImage.bind(this);
         this.hideTextModal = this.hideTextModal.bind(this);
+        this.hideImageModal = this.hideImageModal.bind(this);
 
         this.state = {
             showTextModal: false,
@@ -30,13 +31,29 @@ class Tweet extends Component {
         })
     }
 
-    analyzeImage() {
+    analyzeImage(imageUrl) {
+        if (!imageUrl) return;
 
+        const tweetId = this.props.tweetObj.id;
+
+        if (!this.props.imageAnalysis[tweetId]) {
+            this.props.requestImageAnalysis(tweetId, imageUrl);
+        }
+
+        this.setState({
+            showImageModal: true
+        })
     }
 
     hideTextModal() {
         this.setState({
             showTextModal: false
+        })
+    }
+
+    hideImageModal() {
+        this.setState({
+            showImageModal: false
         })
     }
 
@@ -63,7 +80,7 @@ class Tweet extends Component {
             }
 
             if (textAnalysis.entities.documents[0].entities.length === 0) {
-                entities.push(<p>None</p>)
+                entities.push("None")
             } else {
                 textAnalysis.entities.documents[0].entities.forEach((e) => {
                     entities.push(<a target="_blank" href={e.wikipediaUrl}>{e.name}</a>);
@@ -72,6 +89,38 @@ class Tweet extends Component {
             }
 
             sentiment = textAnalysis.sentiment.documents[0].score;
+        }
+
+        const imageAnalysis = this.props.imageAnalysis[this.props.tweetObj.id];
+        let imageTags = [];
+        let description = '';
+        let isAdult = false;
+        let adultScore = '';
+        let isRacy = false;
+        let racyScore = '';
+
+        if (imageAnalysis) {
+            if (imageAnalysis.tags && Array.isArray(imageAnalysis.tags)) {
+                imageAnalysis.tags.forEach((t) => {
+                    imageTags.push('Tag: ' + t.name + ', Confidence: ' + t.confidence);
+                });
+            }
+
+            if (imageAnalysis.description && imageAnalysis.description.captions) {
+                description = 'Caption: ' + imageAnalysis.description.captions[0].text + ', Confidence: ' + imageAnalysis.description.captions[0].confidence
+            } else if (imageAnalysis.description && imageAnalysis.description.tags) {
+                imageAnalysis.description.tags.forEach((t) => {
+                    description += t + ' ';
+                });
+            }
+
+            if (imageAnalysis.adult) {
+                isAdult = imageAnalysis.adult.isAdultContent;
+                isRacy = imageAnalysis.adult.isRacyContent;
+
+                adultScore = imageAnalysis.adult.adultScore;
+                racyScore = imageAnalysis.adult.racyScore;
+            }
         }
 
         return (
@@ -102,7 +151,7 @@ class Tweet extends Component {
                         </Col>
                         <Col sm={2}>
                             <Button
-                                onClick={this.requestTweets}
+                                onClick={() => this.analyzeImage(mediaUrl)}
                                 bsClass="btn"
                                 bsStyle="info"
                             >
@@ -147,6 +196,42 @@ class Tweet extends Component {
                     </Modal.Body>
                     <Modal.Footer>
                         <Button onClick={this.hideTextModal}>Close</Button>
+                    </Modal.Footer>
+                </Modal>
+                <Modal show={this.state.showImageModal} onHide={this.hideImageModal}>
+                    <Modal.Header closeButton>
+                        <Modal.Title>Image Analysis</Modal.Title>
+                    </Modal.Header>
+                    <Modal.Body>
+                        {
+                            imageAnalysis ?
+                                <div>
+                                    <Image src={mediaUrl} alt="Analyzed Media" responsive />
+                                    <h4>Tags</h4>
+                                    <ul>
+                                        {imageTags.map((t) => {
+                                            return <li key={t}>{t}</li>;
+                                        })}
+                                    </ul>
+                                    <h4>Description</h4>
+                                    <p>
+                                        {description}
+                                    </p>
+                                    <h4>Adult Content</h4>
+                                    <p>
+                                        Is Adult? {isAdult ? " True" : " False"}<br />
+                                        Is Racy? {isRacy ? " True" : " False"}<br />
+                                        Adult Score: {adultScore}<br />
+                                        Racy Score: {racyScore}<br />
+                                        0 = Rated G, 1 = Rated NC-17
+                                    </p>
+                                </div>
+                                :
+                                <img alt="loading..." height={64} width={64} src="/loading.gif" />
+                        }
+                    </Modal.Body>
+                    <Modal.Footer>
+                        <Button onClick={this.hideImageModal}>Close</Button>
                     </Modal.Footer>
                 </Modal>
             </div>
