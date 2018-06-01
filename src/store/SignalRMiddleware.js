@@ -5,23 +5,23 @@
 //     .configureLogging(LogLevel.Debug)
 //     .build();
 
-const connection = [];
+// const connection = [];
 
 export function signalRInvokeMiddleware(store) {
     return (next) => async (action) => {
-        switch (action.type) {
-            case "SIGNALR_FETCH_TWEETS":
-                connection.invoke('FetchTweets');
-                break;
-            case "SIGNALR_ANALYZE_TEXT":
-                connection.invoke('TextAnalysis', action.text);
-                break;
-            case "SIGNALR_ANALYZE_IMAGE":
-                connection.invoke('ImageAnalysis', action.imageUrl);
-                break;
-            default:
-                break;
-        }
+        // switch (action.type) {
+        //     case "SIGNALR_FETCH_TWEETS":
+        //         connection.invoke('FetchTweets');
+        //         break;
+        //     case "SIGNALR_ANALYZE_TEXT":
+        //         connection.invoke('TextAnalysis', action.text);
+        //         break;
+        //     case "SIGNALR_ANALYZE_IMAGE":
+        //         connection.invoke('ImageAnalysis', action.imageUrl);
+        //         break;
+        //     default:
+        //         break;
+        // }
 
         return next(action);
     }

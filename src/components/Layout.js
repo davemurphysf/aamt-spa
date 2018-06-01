@@ -23,7 +23,7 @@ export default props => (
         </Navbar>
         <Grid>
             <Row>
-                <Col sm={9}>
+                <Col smOffset={1} sm={10}>
                     {props.children}
                 </Col>
             </Row>
