@@ -1,92 +1,104 @@
-// import { HubConnectionBuilder, HttpTransportType, LogLevel } from '@aspnet/signalr/dist/browser/signalr.js';
+import * as SignalR from "@aspnet/signalr";
+import axios from "axios";
+import {
+    requestSignIn,
+    receiveSignIn,
+    signInError,
+    signOut,
+    receiveSignInStats,
+    receiveAnalyzeStats,
+    receiveFetchStats
+} from "./Stats";
 
-// const connection = new HubConnectionBuilder()
-//     .withUrl('/chat', { transport: HttpTransportType.WebSockets })
-//     .configureLogging(LogLevel.Debug)
-//     .build();
+let connection = [];
 
-// const connection = [];
+export async function signalRRegisterCommands(store) {
+    try {
+        const fetchResponse = await axios.get(`https://aamt-func.azurewebsites.net/api/signin`);
 
-export function signalRInvokeMiddleware(store) {
-    return (next) => async (action) => {
-        // switch (action.type) {
-        //     case "SIGNALR_FETCH_TWEETS":
-        //         connection.invoke('FetchTweets');
-        //         break;
-        //     case "SIGNALR_ANALYZE_TEXT":
-        //         connection.invoke('TextAnalysis', action.text);
-        //         break;
-        //     case "SIGNALR_ANALYZE_IMAGE":
-        //         connection.invoke('ImageAnalysis', action.imageUrl);
-        //         break;
-        //     default:
-        //         break;
-        // }
+        if (!fetchResponse.data.authInfo || !fetchResponse.data.authInfo.serviceUrl || !fetchResponse.data.authInfo.accessToken ||
+            !fetchResponse.data.authInfo.signInStats || !fetchResponse.data.authInfo.signInStats.TotalNumber ||
+            !fetchResponse.data.authInfo.fetchStats || !fetchResponse.data.authInfo.fetchStats.TotalNumber || !fetchResponse.data.authInfo.fetchStats.Username ||
+            !fetchResponse.data.authInfo.analyzeStats || !fetchResponse.data.authInfo.analyzeStats.TotalText || !fetchResponse.data.authInfo.analyzeStats.TotalPicture) {
+            store.dispatch({
+                type: signInError
+            });
+            throw (new Error("Malformed request returned from signin function"));
+        }
 
-        return next(action);
+        store.dispatch({
+            type: requestSignIn,
+            signIns: fetchResponse.data.authInfo.signInStats.TotalNumber,
+            tweetsFetched: fetchResponse.data.authInfo.fetchStats.TotalNumber,
+            usernames: fetchResponse.data.authInfo.fetchStats.Username,
+            textAnalyzed: fetchResponse.data.authInfo.analyzeStats.TotalText,
+            picturesAnalyzed: fetchResponse.data.authInfo.analyzeStats.TotalPicture
+
+        });
+
+        connection = new SignalR.HubConnectionBuilder()
+            .withUrl(fetchResponse.data.authInfo.serviceUrl, { accessTokenFactory: () => fetchResponse.data.authInfo.accessToken })
+            .build();
+
+    } catch (error) {
+        console.error('Error on connection');
+        console.error(error);
+
+        store.dispatch({
+            type: signInError
+        });
+
+        return;
     }
-}
 
-export function signalRRegisterCommands(store, callback) {
-    callback();
+    connection.on('updateSignInStats', totalNumber => {
+        if (!totalNumber) return;
 
-    // connection.on('tweet', data => {
-    //     if (!data) return;
+        store.dispatch({
+            type: receiveSignInStats,
+            signIns: totalNumber
+        });
 
-    //     store.dispatch({
-    //         type: 'RECEIVE_TWEET',
-    //         tweet: data
-    //     });
+        console.log('updateSignInStats received');
+    });
 
-    //     console.log('Tweet received');
-    //     console.log('Tweet', data);
-    // });
+    connection.on('updateAnalyzeTweetsStats', (totalText, totalPicture) => {
+        if (!totalText || !totalPicture) return;
 
-    // connection.on('textAnalysis', data => {
-    //     if (!data) return;
+        store.dispatch({
+            type: receiveAnalyzeStats,
+            text: totalText,
+            pictures: totalPicture
+        });
 
-    //     store.dispatch({
-    //         type: 'RECEIVE_TEXT_ANALYSIS',
-    //         tweet: data
-    //     });
+        console.log('updateAnalyzeTweetsStats received');
+    });
 
-    //     console.log('Text Analysis received');
-    //     console.log(data);
-    // });
+    connection.on('updateFetchTweetsStats', (totalNumber, usernames) => {
+        if (!totalNumber || !usernames) return;
 
-    // connection.on('imageAnalysis', data => {
-    //     if (!data) return;
+        store.dispatch({
+            type: receiveFetchStats,
+            tweetsFetched: totalNumber,
+            usernames: usernames
+        });
 
-    //     store.dispatch({
-    //         type: 'RECEIVE_IMAGE_ANALYSIS',
-    //         tweet: data
-    //     });
+        console.log('updateAnalyzeTweetsStats received');
+    });
 
-    //     console.log('Image Analysis received');
-    //     console.log(data);
-    // });
+    connection.onclose(() => {
+        store.dispatch({
+            type: signOut
+        });
+    });
 
-    // connection.onclose(error => {
-    //     if (error && error.message) {
-    //         console.error('Connection error');
-    //         console.error(error.message);
-    //     } else {
-    //         console.log('Connection closed');
-    //     }
-    // });
-
-    // connection
-    //     .start()
-    //     .then(() => {
-    //         console.log('SignalR Connected');
-    //         callback();
-    //     })
-    //     .catch(function (error) {
-    //         console.log('Connection error');
-    //         if (error) {
-    //             if (error.message) {
-    //                 console.error(error.message);
-    //             }
-    //         }
-    //     });
+    connection.start().then(() => {
+        store.dispatch({
+            type: receiveSignIn
+        });
+    }).catch(() => {
+        store.dispatch({
+            type: signInError
+        });
+    });
 }
