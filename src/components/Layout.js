@@ -1,5 +1,6 @@
 import React from 'react';
 import { Col, Grid, Row, Nav, Navbar, NavItem } from 'react-bootstrap';
+import StatsComponent from "./StatsComponent";
 
 export default props => (
     <div>
@@ -26,6 +27,7 @@ export default props => (
                 <Col smOffset={1} sm={10}>
                     {props.children}
                 </Col>
+                <StatsComponent />
             </Row>
         </Grid>
     </div>
