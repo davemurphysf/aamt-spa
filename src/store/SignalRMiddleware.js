@@ -51,12 +51,12 @@ export async function signalRRegisterCommands(store) {
         return;
     }
 
-    connection.on('updateSignInStats', totalNumber => {
-        if (!totalNumber) return;
+    connection.on('updateSignInStats', updateObj => {
+        if (!updateObj || !updateObj.totalNumber) return;
 
         store.dispatch({
             type: receiveSignInStats,
-            signIns: totalNumber
+            signIns: updateObj.totalNumber
         });
 
         console.log('updateSignInStats received');
