@@ -2,13 +2,11 @@
 import thunk from 'redux-thunk';
 import { routerReducer, routerMiddleware } from 'react-router-redux';
 import * as Tweets from './Tweets';
-import * as Auth from './Auth';
 import { signalRInvokeMiddleware } from './SignalRMiddleware'
 
 export default function configureStore(history, initialState) {
     const reducers = {
         tweets: Tweets.reducer,
-        auth: Auth.reducer
     };
 
     const middleware = [
