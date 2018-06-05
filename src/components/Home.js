@@ -39,8 +39,7 @@ class Home extends Component {
         return (
             <div>
                 <Row>
-                    <Col sm={3}></Col>
-                    <Col sm={6}>
+                    <Col sm={6} smOffset={3}>
                         <Form onSubmit={this.requestTweets}>
                             <FormGroup>
                                 <InputGroup>
@@ -70,7 +69,7 @@ class Home extends Component {
                     </Col>
                 </Row>
                 {tweets}
-            </div>
+            </div >
         );
     }
 }

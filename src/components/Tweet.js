@@ -124,17 +124,17 @@ class Tweet extends Component {
         }
 
         return (
-            <div className="tweet-row">
+            <div className="tweet-row row">
                 <Row>
                     <Col sm={2}>
                         <img src={this.props.tweetObj.user.profile_image_url_https} alt="Profile" />
                     </Col>
-                    <Col sm={8}>
+                    <Col sm={6} md={8}>
                         <p>
                             {this.props.tweetObj.text}
                         </p>
                     </Col>
-                    <Col sm={2}>
+                    <Col sm={4} md={2}>
                         <Button
                             onClick={this.analyzeText}
                             bsClass="btn"
@@ -146,10 +146,10 @@ class Tweet extends Component {
                 </Row>
                 {mediaUrl &&
                     <Row>
-                        <Col sm={8} smOffset={2}>
+                        <Col sm={6} smOffset={2} md={8} mdOffset={2}>
                             <Image src={mediaUrl} alt="Media" responsive />
                         </Col>
-                        <Col sm={2}>
+                        <Col sm={4} md={2}>
                             <Button
                                 onClick={() => this.analyzeImage(mediaUrl)}
                                 bsClass="btn"

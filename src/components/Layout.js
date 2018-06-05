@@ -24,7 +24,7 @@ export default props => (
         </Navbar>
         <Grid>
             <Row>
-                <Col smOffset={1} sm={10}>
+                <Col sm={8}>
                     {props.children}
                 </Col>
                 <StatsComponent />
