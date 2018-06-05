@@ -83,7 +83,7 @@ class Tweet extends Component {
                 entities.push("None")
             } else {
                 textAnalysis.entities.documents[0].entities.forEach((e) => {
-                    entities.push(<a target="_blank" href={e.wikipediaUrl}>{e.name}</a>);
+                    entities.push(<a target="_blank" key={e.name} href={e.wikipediaUrl}>{e.name}</a>);
                     entities.push(<br />);
                 });
             }
@@ -106,7 +106,7 @@ class Tweet extends Component {
                 });
             }
 
-            if (imageAnalysis.description && imageAnalysis.description.captions) {
+            if (imageAnalysis.description && imageAnalysis.description.captions && Array.isArray(imageAnalysis.description.captions) && imageAnalysis.description.captions.length > 0) {
                 description = 'Caption: ' + imageAnalysis.description.captions[0].text + ', Confidence: ' + imageAnalysis.description.captions[0].confidence
             } else if (imageAnalysis.description && imageAnalysis.description.tags) {
                 imageAnalysis.description.tags.forEach((t) => {

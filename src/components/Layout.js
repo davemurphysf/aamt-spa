@@ -7,17 +7,17 @@ export default props => (
         <Navbar inverse collapseOnSelect>
             <Navbar.Header>
                 <Navbar.Brand>
-                    <a href="#brand">Azure Analyze My Tweets Demo</a>
+                    Azure Analyze My Tweets Demo
                 </Navbar.Brand>
                 <Navbar.Toggle />
             </Navbar.Header>
             <Navbar.Collapse>
                 <Nav pullRight>
-                    <NavItem eventKey={1} href="#">
-                        Link Right
+                    <NavItem href={'https://github.com/davemurphysf/aamt-spa'}>
+                        <i className="fa fa-github" aria-hidden="true"></i> SPA
                     </NavItem>
-                    <NavItem eventKey={2} href="#">
-                        Link Right
+                    <NavItem href={'https://github.com/davemurphysf/aamt-functions'}>
+                        <i className="fa fa-github" aria-hidden="true"></i> Functions
                     </NavItem>
                 </Nav>
             </Navbar.Collapse>
