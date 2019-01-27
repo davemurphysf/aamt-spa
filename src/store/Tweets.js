@@ -98,6 +98,7 @@ export const reducer = (state, action) => {
         const updatedTweetsObj = Object.assign({}, state.tweets);
 
         action.tweets.forEach((tweet) => {
+            tweet.timestamp = Date.now();
             updatedTweetsObj[tweet.id] = tweet;
         });
 

@@ -28,13 +28,21 @@ class Home extends Component {
         e.preventDefault();
     }
     render() {
-        const tweets = [];
+        const tweetJson = [];
 
         for (const t in this.props.tweets.tweets) {
             if (this.props.tweets.tweets.hasOwnProperty(t)) {
-                tweets.push(<Tweet key={t} tweetObj={this.props.tweets.tweets[t]} />);
+                tweetJson.push(this.props.tweets.tweets[t]);
             }
         }
+
+        tweetJson.sort((a, b) => {
+            if (a.timestamp === b.timestamp) return 0;
+            if (a.timestamp < b.timestamp) return 1;
+            return -1;
+        });
+
+        const tweets = tweetJson.map(t => <Tweet key={t.id} tweetObj={t} />);
 
         return (
             <div>
